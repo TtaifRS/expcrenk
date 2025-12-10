@@ -1,26 +1,76 @@
-@import "tailwindcss";
+@import 'tailwindcss/preflight';
+@import 'tailwindcss/utilities';
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	/* Colors */
+	--color-white: #fff;
+	--color-gray-light: #999;
+	--color-gray-dark: #343434;
+	--color-black-dark: #212121;
+	--color-black: #000;
+	--color-background: #fff1e5;
+	--color-text: #000;
+
+	/* Fonts */
+	--font-family-body: Inter, sans-serif;
+	--font-family-heading: Playfair Display, serif;
+
+	/* Font Sizes */
+	--font-size-display: clamp(3rem, 10vw, 10rem);
+	--font-size-h1: clamp(2rem, 5vw, 3.5rem);
+	--font-size-h2: clamp(1.25rem, 3vw, 1.75rem);
+	--font-size-body: clamp(0.875rem, 2vw, 1rem);
+	--font-size-caption: clamp(0.75rem, 1.5vw, 0.875rem);
+	--font-size-button: clamp(0.875rem, 2vw, 1rem);
+
+	/* Line Heights */
+	--line-height-tight: 1.1;
+	--line-height-normal: 1.4;
+	--line-height-loose: 1.6;
+
+	/* Spacing */
+	--spacing-1: 0.25rem;
+	--spacing-2: 0.5rem;
+	--spacing-4: 1rem;
+	--spacing-6: 1.5rem;
+	--spacing-8: 2rem;
+	--spacing-12: 3rem;
+	--spacing-16: 4rem;
+	--spacing-24: 6rem;
+	--spacing-hero: clamp(1rem, 4vw, 12rem);
+
+	/* Effects */
+	--effect-blur-sm: 20px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	width: 100%;
+	height: 100%;
+	background-color: var(--color-background);
+	font-family: var(--font-family-body);
+	font-size: var(--font-size-body);
+	line-height: var(--line-height-normal);
+}
+
+.lenis.lenis-smooth {
+	scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+	overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+	overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+	pointer-events: none;
 }

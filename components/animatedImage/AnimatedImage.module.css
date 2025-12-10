@@ -1,0 +1,45 @@
+.reveal {
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	overflow: hidden;
+	position: relative;
+	will-change: clip-path, opacity;
+}
+
+.large {
+	width: 100%;
+	height: 100%;
+}
+
+.small {
+	width: 100px;
+	height: 100px;
+	max-width: 100px;
+}
+
+@media screen and (max-width: 900px) {
+	.large {
+		height: 100%;
+	}
+
+	.small {
+		width: 80px;
+		height: 80px;
+		max-width: 80px;
+		display: none;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	.large {
+		height: 100%;
+	}
+
+	.small {
+		width: 60px;
+		height: 60px;
+		max-width: 60px;
+		display: none;
+	}
+}

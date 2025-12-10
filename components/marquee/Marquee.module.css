@@ -1,0 +1,71 @@
+.marqueeContainer {
+	width: 100%;
+	height: 10vh;
+	overflow: hidden;
+	position: relative;
+	background-color: var(--color-black);
+	display: flex;
+	justify-content: center;
+	font-family: var(--font-family-body);
+}
+
+.cardMarquee {
+	width: 100%;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	overflow: hidden;
+}
+
+.marquee {
+	display: flex;
+}
+
+.marquee p {
+	white-space: nowrap;
+	text-transform: uppercase;
+	font-family: var(--font-family-body);
+	font-weight: 600;
+	font-size: var(--font-size-h1);
+	margin-right: var(--spacing-12);
+	color: var(--color-background);
+	line-height: var(--line-height-normal);
+}
+
+.copyableCode {
+	text-decoration: underline;
+	font-weight: 800;
+	background: color-mix(in srgb, var(--color-background) 20%, transparent);
+	border-radius: var(--spacing-1);
+	padding: var(--spacing-1) var(--spacing-2);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	user-select: none;
+	min-height: var(--spacing-16);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.copyableCode:hover,
+.copyableCode:focus {
+	background: color-mix(in srgb, var(--color-background) 40%, transparent);
+	transform: scale(1.02);
+}
+
+.copyableCode:active {
+	background: color-mix(in srgb, var(--color-background) 60%, transparent);
+	transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+	.copyableCode {
+		padding: var(--spacing-2) var(--spacing-4);
+	}
+
+	.marquee p {
+		font-size: var(--font-size-h2);
+		margin-right: var(--spacing-8);
+	}
+}

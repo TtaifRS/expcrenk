@@ -1,0 +1,119 @@
+.header {
+	background-color: var(--color-background);
+	position: fixed;
+	z-index: 10000;
+	font-family: var(--font-family-body);
+	width: 100%;
+	box-sizing: border-box;
+	padding: 10px;
+}
+
+.bar {
+	display: flex;
+	width: 100%;
+	margin: 0 auto;
+	max-width: 1400px;
+	padding: 0 20px;
+	justify-content: center;
+	text-transform: uppercase;
+	font-size: 12px;
+	font-weight: 400;
+	position: relative;
+}
+
+.bar p {
+	margin: 0px;
+}
+
+.bar a {
+	text-decoration: none;
+	color: black;
+	position: absolute;
+	left: 0;
+}
+
+.shopContainer {
+	display: flex;
+	top: 50%;
+	transform: translateY(-50%);
+	gap: 30px;
+	position: absolute;
+	right: 0;
+}
+
+.el {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.label {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 100%;
+}
+
+.label p:nth-of-type(2) {
+	position: absolute;
+}
+
+.label p:nth-of-type(2) {
+	opacity: 0;
+}
+
+.shop {
+	display: none;
+}
+
+.burger {
+	width: 22.5px;
+	position: relative;
+	pointer-events: none;
+}
+
+.burger::after,
+.burger::before {
+	content: '';
+	height: 1px;
+	width: 100%;
+	background-color: black;
+	position: relative;
+	display: block;
+	transition: all 1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.burger::after {
+	top: -4px;
+}
+
+.burger::before {
+	top: 4px;
+}
+
+.burgerActive::after {
+	transform: rotate(45deg);
+	top: -1px;
+}
+
+.burgerActive::before {
+	transform: rotate(-45deg);
+	top: 1px;
+}
+
+@media only screen and (min-width: 600px) {
+	.header {
+		padding: 20px;
+	}
+
+	.bar {
+		font-size: 15px;
+	}
+
+	.shop {
+		display: block;
+		cursor: pointer;
+	}
+}
