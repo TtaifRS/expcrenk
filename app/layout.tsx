@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
-import ClientProviders from './components/ClientProviders'
-import Header from '@/components/navigations/navbar/Header'
+import LayoutClientWrapper from './layoutClientWrapper' // Import the client wrapper
 
 const inter = Inter({
 	subsets: ['latin'],
@@ -14,6 +13,7 @@ const playfair = Playfair_Display({
 	variable: '--font-playfair',
 })
 
+// Metadata still works because this is server component
 export const metadata: Metadata = {
 	title: 'Nokshi Kabbo - Nakshi Kantha Quilts',
 	description: 'Handcrafted Nakshi Kantha quilts from Bangladesh artisans.',
@@ -27,10 +27,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${inter.variable} ${playfair.variable}`}>
 			<body className={inter.className}>
-				<ClientProviders>
-					<Header />
-					{children}
-				</ClientProviders>
+				<LayoutClientWrapper>{children}</LayoutClientWrapper>
 			</body>
 		</html>
 	)

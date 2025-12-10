@@ -6,15 +6,12 @@ import { useLenis } from 'lenis/react'
 import Lenis from 'lenis'
 import styles from '../styles/Hero.module.css'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import { Marquee } from '@/components/marquee/Marquee'
 import { useThrottledResize } from '@/hooks/useThrottledResize'
-
-const modelUrl = '/models/blanket.glb'
-const textureUrl = '/images/nakshi-1.png'
+import { usePreloadAssets } from '@/hooks/usePreloadAssets'
 
 if (typeof window !== 'undefined') {
 	gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
@@ -34,8 +31,17 @@ export default function Hero() {
 	const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
 	const animationFrameRef = useRef<number | null>(null)
 
+	// Use preloaded assets
+	const {
+		model: preloadedModel,
+		texture: preloadedTexture,
+		isLoaded: assetsLoaded,
+	} = usePreloadAssets()
+
 	// State to track mobile status
 	const [isMobile, setIsMobile] = useState(false)
+	const [isThreeJsReady, setIsThreeJsReady] = useState(false)
+	const [showThreeJs, setShowThreeJs] = useState(false)
 
 	useLenis((lenis: Lenis) => {
 		scrollProgressRef.current =
@@ -50,14 +56,10 @@ export default function Hero() {
 
 			if (!cameraRef.current || !rendererRef.current) return
 
-			// Update camera
 			cameraRef.current.aspect = width / height
 			cameraRef.current.updateProjectionMatrix()
-
-			// Update renderer
 			rendererRef.current.setSize(width, height)
 
-			// Adjust camera position based on screen size
 			if (modelGroupRef.current && maxDimRef.current > 0) {
 				cameraRef.current.position.z =
 					width > 900 ? maxDimRef.current * 0.6 : maxDimRef.current
@@ -69,10 +71,13 @@ export default function Hero() {
 	// Use the custom resize hook
 	useThrottledResize(handleResize, 200)
 
+	// Initialize Three.js once assets are loaded
 	useEffect(() => {
-		if (!modelRef.current) return
+		if (!assetsLoaded || !preloadedModel || !modelRef.current) return
 
-		// Initialize Three.js scene
+		console.log('Initializing Three.js...')
+
+		// Initialize scene
 		const scene = new THREE.Scene()
 		sceneRef.current = scene
 
@@ -85,7 +90,7 @@ export default function Hero() {
 		camera.position.z = 5
 		cameraRef.current = camera
 
-		// Optimize renderer for device
+		// Optimize renderer
 		const initialIsMobile = window.innerWidth < 768
 		setIsMobile(initialIsMobile)
 
@@ -104,7 +109,12 @@ export default function Hero() {
 				: window.devicePixelRatio
 		)
 
-		// Conditional features for performance
+		// Configure texture if available
+		if (preloadedTexture && rendererRef.current) {
+			preloadedTexture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+		}
+
+		// Performance settings
 		if (!initialIsMobile) {
 			renderer.shadowMap.enabled = true
 			renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -113,9 +123,13 @@ export default function Hero() {
 		renderer.toneMapping = THREE.ACESFilmicToneMapping
 		renderer.toneMappingExposure = 1.2
 
-		modelRef.current.appendChild(renderer.domElement)
+		// Clear and add canvas
+		if (modelRef.current) {
+			modelRef.current.innerHTML = ''
+			modelRef.current.appendChild(renderer.domElement)
+		}
 
-		// Lighting setup (preserving all original lighting)
+		// Lighting setup
 		const ambientLight = new THREE.AmbientLight(0xffffff, 1.0)
 		scene.add(ambientLight)
 
@@ -134,12 +148,77 @@ export default function Hero() {
 		hemiLight.position.set(0, 0, 0)
 		scene.add(hemiLight)
 
-		// Animation variables
-		const floatAmplitude = 0.2
-		const floatSpeed = 1.5
-		let isFloating = true
+		// Clone model and apply texture
+		const model = preloadedModel.clone()
 
-		// Setup Lenis for smooth scrolling
+		// Apply texture properly
+		model.traverse((child) => {
+			if (child instanceof THREE.Mesh) {
+				const mesh = child as THREE.Mesh
+
+				// Check if texture is available
+				if (preloadedTexture && preloadedTexture.image) {
+					console.log('Applying texture to mesh')
+
+					// Ensure texture is ready
+					if (preloadedTexture.image.complete) {
+						preloadedTexture.needsUpdate = true
+
+						mesh.material = new THREE.MeshStandardMaterial({
+							map: preloadedTexture,
+							metalness: 0,
+							roughness: 0.8,
+							emissive: new THREE.Color(0xf0e8d8),
+							emissiveIntensity: 0.1,
+							side: THREE.DoubleSide,
+						})
+
+						mesh.material.needsUpdate = true
+					} else {
+						// Texture not ready, use fallback
+						console.log('Texture not ready, using fallback')
+						mesh.material = new THREE.MeshStandardMaterial({
+							color: 0xf0e8d8,
+							metalness: 0,
+							roughness: 0.8,
+							side: THREE.DoubleSide,
+						})
+					}
+				} else {
+					// No texture, use colored material
+					console.log('No texture available, using colored material')
+					mesh.material = new THREE.MeshStandardMaterial({
+						color: 0xf0e8d8,
+						metalness: 0,
+						roughness: 0.8,
+						side: THREE.DoubleSide,
+					})
+				}
+
+				mesh.castShadow = !initialIsMobile
+				mesh.receiveShadow = !initialIsMobile
+			}
+		})
+
+		// Center model
+		const box = new THREE.Box3().setFromObject(model)
+		const center = box.getCenter(new THREE.Vector3())
+		model.position.sub(center)
+
+		const size = box.getSize(new THREE.Vector3())
+		maxDimRef.current = Math.max(size.x, size.y, size.z)
+
+		scene.add(model)
+		modelGroupRef.current = model
+
+		// Initial animation state
+		model.scale.set(0, 0, 0)
+		model.rotation.set(Math.PI / 2, Math.PI + 0.5, 0)
+
+		// Camera positioning
+		handleResize(window.innerWidth, window.innerHeight, initialIsMobile)
+
+		// Setup Lenis
 		let lenisInstance: Lenis | null = null
 		if (typeof Lenis !== 'undefined') {
 			lenisInstance = new Lenis()
@@ -149,17 +228,36 @@ export default function Hero() {
 		}
 		ScrollTrigger.config({ ignoreMobileResize: true })
 
-		// Optimized animation loop
+		// Entrance animation
+		gsap.to(model.scale, {
+			x: 1,
+			y: 1,
+			z: 1,
+			duration: 1.5,
+			ease: 'power3.out',
+			onComplete: () => {
+				console.log('Three.js ready')
+				setIsThreeJsReady(true)
+				setShowThreeJs(true)
+			},
+		})
+
+		// Animation variables
+		const floatAmplitude = 0.2
+		const floatSpeed = 1.5
+		let isFloating = true
+
+		// Animation loop
 		const animate = () => {
 			if (modelGroupRef.current) {
-				// Preserve floating animation
+				// Floating animation
 				if (isFloating) {
 					const floatOffset =
 						Math.sin(Date.now() * 0.001 * floatSpeed) * floatAmplitude
 					modelGroupRef.current.position.y = floatOffset
 				}
 
-				// Preserve rotation based on scroll
+				// Scroll-based rotation
 				modelGroupRef.current.rotation.y =
 					scrollProgressRef.current * Math.PI * 4 + 0.5
 			}
@@ -168,90 +266,10 @@ export default function Hero() {
 			animationFrameRef.current = requestAnimationFrame(animate)
 		}
 
-		// Start animation
 		animate()
 
-		// Load model and texture
-		const loader = new GLTFLoader()
-		const textureLoader = new THREE.TextureLoader()
-
-		loader.load(
-			modelUrl,
-			(gltf) => {
-				const model = gltf.scene
-				textureLoader.load(
-					textureUrl,
-					(texture: THREE.Texture) => {
-						texture.flipY = false
-						texture.colorSpace = THREE.SRGBColorSpace
-						texture.wrapS = THREE.RepeatWrapping
-						texture.wrapT = THREE.RepeatWrapping
-						texture.repeat.set(1, 1)
-						texture.minFilter = THREE.LinearMipmapLinearFilter
-						texture.magFilter = THREE.LinearFilter
-						texture.generateMipmaps = true
-						texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
-
-						model.traverse((node: THREE.Object3D) => {
-							if (node.type === 'Mesh') {
-								const mesh = node as THREE.Mesh
-								mesh.material = new THREE.MeshStandardMaterial({
-									map: texture,
-									metalness: 0,
-									roughness: 0.8,
-									emissive: new THREE.Color(0xf0e8d8),
-									emissiveIntensity: 0.1,
-									side: THREE.DoubleSide,
-								})
-								if (!initialIsMobile) {
-									mesh.castShadow = true
-									mesh.receiveShadow = true
-								}
-							}
-						})
-
-						const box = new THREE.Box3().setFromObject(model)
-						const center = box.getCenter(new THREE.Vector3())
-						model.position.sub(center)
-						scene.add(model)
-						modelGroupRef.current = model
-
-						const size = box.getSize(new THREE.Vector3())
-						maxDimRef.current = Math.max(size.x, size.y, size.z)
-
-						// Update camera position based on model size
-						handleResize(window.innerWidth, window.innerHeight, initialIsMobile)
-
-						// Preserve entrance animation
-						model.scale.set(0, 0, 0)
-						model.rotation.set(Math.PI / 2, Math.PI + 0.5, 0)
-
-						gsap.to(model.scale, {
-							x: 1,
-							y: 1,
-							z: 1,
-							duration: 1,
-							ease: 'power2.out',
-						})
-					},
-					undefined,
-					(err: unknown) => console.error('Failed to load texture:', err)
-				)
-			},
-			undefined,
-			(err: unknown) => console.error('Failed to load model:', err)
-		)
-
-		// Handle page visibility changes
-		const handleVisibilityChange = () => {
-			isFloating = !document.hidden
-		}
-		document.addEventListener('visibilitychange', handleVisibilityChange)
-
+		// Cleanup
 		return () => {
-			// Cleanup
-			document.removeEventListener('visibilitychange', handleVisibilityChange)
-
 			if (animationFrameRef.current) {
 				cancelAnimationFrame(animationFrameRef.current)
 			}
@@ -263,25 +281,17 @@ export default function Hero() {
 				}
 			}
 
-			// Clean up Three.js resources
 			if (sceneRef.current) {
-				sceneRef.current.traverse((object: THREE.Object3D) => {
-					if (object.type === 'Mesh') {
-						const mesh = object as THREE.Mesh
+				sceneRef.current.traverse((object) => {
+					if (object instanceof THREE.Mesh) {
+						const mesh = object
 						mesh.geometry.dispose()
-						const material = mesh.material
-						if (Array.isArray(material)) {
-							material.forEach((mat) => {
-								if ('map' in mat && mat.map) {
-									;(mat.map as THREE.Texture).dispose()
-								}
-								mat.dispose()
-							})
-						} else {
-							if ('map' in material && material.map) {
-								;(material.map as THREE.Texture).dispose()
+						if (mesh.material) {
+							if (Array.isArray(mesh.material)) {
+								mesh.material.forEach((mat) => mat.dispose())
+							} else {
+								mesh.material.dispose()
 							}
-							material.dispose()
 						}
 					}
 				})
@@ -290,10 +300,13 @@ export default function Hero() {
 			if (lenisInstance) {
 				lenisInstance.destroy()
 			}
-			gsap.ticker.remove((time) => lenisInstance?.raf(time * 1000))
-		}
-	}, [handleResize])
 
+			setIsThreeJsReady(false)
+			setShowThreeJs(false)
+		}
+	}, [assetsLoaded, preloadedModel, preloadedTexture, handleResize])
+
+	// GSAP animations (keep your existing code)
 	useGSAP(
 		() => {
 			const outroTitle = outroTitleRef.current
@@ -359,7 +372,15 @@ export default function Hero() {
 
 	return (
 		<div className={styles.heroWrapper}>
-			<div ref={modelRef} className={styles.model}></div>
+			{/* Three.js Canvas Container - Completely hidden until ready */}
+			<div
+				ref={modelRef}
+				className={styles.model}
+				style={{
+					opacity: showThreeJs ? 1 : 0,
+					pointerEvents: showThreeJs ? 'auto' : 'none',
+				}}
+			/>
 
 			<section className={styles.intro}>
 				<div className={styles['header-row']}>
