@@ -28,7 +28,7 @@ export default function RootLayout({
 		<html lang="en" className={`${inter.variable} ${playfair.variable}`}>
 			<head>
 				{/* Preload critical assets */}
-				<link rel="preload" href="/images/hero.jpg" as="image" />
+
 				<link
 					rel="preload"
 					href="/models/blanket.glb"

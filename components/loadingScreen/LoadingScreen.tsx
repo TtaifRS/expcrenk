@@ -62,13 +62,6 @@ export default function LoadingScreen({ progress }: LoadingScreenProps) {
 					Loading<span className={styles.dots}>{dots}</span>
 					<span className={styles.percentage}>{displayProgress}%</span>
 				</div>
-
-				{/* Optional: Show what's being loaded */}
-				{displayProgress < 100 && (
-					<div className={styles.loadingDetails}>
-						<small>Loading images & 3D model...</small>
-					</div>
-				)}
 			</div>
 		</div>
 	)
