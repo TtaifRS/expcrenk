@@ -1,0 +1,48 @@
+/* app/loading.css - Import this in layout if needed */
+
+/* Prevent flash of unstyled content (FOUC) */
+body:not(.loaded) {
+	visibility: hidden;
+}
+
+body.loaded {
+	visibility: visible;
+	animation: fadeInBody 0.5s ease-out;
+}
+
+@keyframes fadeInBody {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Ensure no scrollbars during loading */
+html.loading,
+body.loading {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+html.loading::-webkit-scrollbar,
+body.loading::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera */
+}
+
+/* Smooth scroll restoration */
+html {
+	scroll-behavior: smooth;
+}
+
+/* Fix for iOS Safari 100vh issue */
+.loadingOverlay {
+	height: -webkit-fill-available !important;
+	height: 100dvh !important;
+}
+
+/* Ensure loading screen is always on top */
+.loadingOverlay {
+	isolation: isolate;
+}

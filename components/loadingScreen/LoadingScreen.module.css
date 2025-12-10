@@ -1,4 +1,4 @@
-/* components/LoadingScreen/LoadingScreen.module.css */
+/* components/loadingScreen/LoadingScreen.module.css */
 
 .loadingOverlay {
 	position: fixed;
@@ -6,7 +6,7 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: var(--color-background, #fff1e5);
+	background-color: var(--color-background);
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -16,6 +16,7 @@
 
 .loadingOverlay.hidden {
 	opacity: 0;
+	visibility: hidden;
 	pointer-events: none;
 }
 
@@ -25,7 +26,6 @@
 	max-width: 320px;
 }
 
-/* Progress Bar Container */
 .progressContainer {
 	position: relative;
 	width: 100%;
@@ -33,122 +33,39 @@
 	margin-bottom: 1.5rem;
 }
 
-/* White background bar */
 .progressBackground {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: var(--color-white, #fff);
+	background-color: var(--color-white);
 	border-radius: 1px;
 }
 
-/* Glowing fill bar */
 .progressFill {
 	position: absolute;
 	top: 0;
 	left: 0;
 	height: 100%;
-	background: linear-gradient(
-		90deg,
-		transparent 0%,
-		var(--color-text, #000) 50%,
-		transparent 100%
-	);
+	background-color: var(--color-text);
 	border-radius: 1px;
-	box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 12px rgba(0, 0, 0, 0.1);
-	transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: width 0.3s ease;
 	z-index: 1;
 }
 
-/* Glow effect that follows the progress */
-.progressGlow {
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100%;
-	width: 20%;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		rgba(0, 0, 0, 0.2),
-		transparent
-	);
-	border-radius: 1px;
-	animation: glowMove 2s ease-in-out infinite;
-	opacity: 0.6;
-	filter: blur(1px);
-}
-
-@keyframes glowMove {
-	0% {
-		transform: translateX(-100%);
-	}
-	100% {
-		transform: translateX(500%);
-	}
-}
-
-/* Loading Text */
 .loadingText {
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	font-size: 1rem;
-	font-weight: 400;
-	color: var(--color-text, #000);
-	letter-spacing: 0.02em;
+	color: var(--color-text);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.25rem;
 }
 
-/* Animated Dots */
-.dots {
-	display: inline-block;
-	width: 1.5em;
-	text-align: left;
-	font-weight: 300;
-}
-
-/* Percentage */
 .percentage {
 	margin-left: 0.75rem;
 	font-weight: 500;
-	font-feature-settings: 'tnum';
-	font-variant-numeric: tabular-nums;
-	color: var(--color-gray-dark, #343434);
+	color: var(--color-gray-dark);
 	font-size: 0.9rem;
-}
-
-/* Simple fade in animation for initial appearance */
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-.loadingContent {
-	animation: fadeIn 0.4s ease-out;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-	.loadingText {
-		font-size: 0.95rem;
-	}
-
-	.percentage {
-		font-size: 0.85rem;
-	}
-
-	.progressContainer {
-		height: 1.5px;
-		margin-bottom: 1.25rem;
-	}
 }

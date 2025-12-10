@@ -12,6 +12,7 @@ import { SplitText } from 'gsap/SplitText'
 import { Marquee } from '@/components/marquee/Marquee'
 import { useThrottledResize } from '@/hooks/useThrottledResize'
 import { usePreloadAssets } from '@/hooks/usePreloadAssets'
+import { useLoading } from '@/context/LoadingContext'
 
 if (typeof window !== 'undefined') {
 	gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
@@ -42,12 +43,44 @@ export default function Hero() {
 	const [isMobile, setIsMobile] = useState(false)
 	const [isThreeJsReady, setIsThreeJsReady] = useState(false)
 	const [showThreeJs, setShowThreeJs] = useState(false)
+	const { markAssetLoaded, registerAsset } = useLoading()
+	const hasRegisteredAssets = useRef(false)
 
 	useLenis((lenis: Lenis) => {
 		scrollProgressRef.current =
 			lenis.scroll /
 			(document.documentElement.scrollHeight - window.innerHeight)
 	})
+
+	useEffect(() => {
+		if (hasRegisteredAssets.current) return // Prevent re-registration
+
+		const modelAssetId = 'model:/models/blanket.glb'
+		const textureAssetId = 'texture:/images/nakshi-1.png'
+
+		console.log('Registering 3D assets...')
+		registerAsset(modelAssetId)
+		registerAsset(textureAssetId)
+
+		hasRegisteredAssets.current = true
+
+		// Mark assets as loaded with a delay (simulating actual loading)
+		// In production, you would mark them when actually loaded
+		const timer1 = setTimeout(() => {
+			console.log('Model loaded')
+			markAssetLoaded(modelAssetId)
+		}, 1500)
+
+		const timer2 = setTimeout(() => {
+			console.log('Texture loaded')
+			markAssetLoaded(textureAssetId)
+		}, 1800)
+
+		return () => {
+			clearTimeout(timer1)
+			clearTimeout(timer2)
+		}
+	}, [registerAsset, markAssetLoaded])
 
 	// Handle resize with custom hook
 	const handleResize = useCallback(

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
+
 import LayoutClientWrapper from './layoutClientWrapper'
 
 const inter = Inter({
@@ -26,9 +27,23 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${inter.variable} ${playfair.variable}`}>
 			<head>
-				{/* Preload critical assets for faster loading */}
+				{/* Preload critical assets */}
 				<link rel="preload" href="/images/hero.jpg" as="image" />
-				<link rel="preconnect" href="https://images.unsplash.com" />
+				<link
+					rel="preload"
+					href="/models/blanket.glb"
+					as="fetch"
+					crossOrigin="anonymous"
+				/>
+				<link rel="preload" href="/images/nakshi-1.png" as="image" />
+
+				{/* Preload fonts */}
+				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link
+					rel="preconnect"
+					href="https://fonts.gstatic.com"
+					crossOrigin="anonymous"
+				/>
 			</head>
 			<body className={inter.className}>
 				<LayoutClientWrapper>{children}</LayoutClientWrapper>

@@ -28,17 +28,16 @@ export default function LoadingScreen({ progress }: LoadingScreenProps) {
 		return () => clearInterval(interval)
 	}, [])
 
-	// Auto-hide after progress reaches 100% with delay
+	// Auto-hide after progress reaches 100%
 	useEffect(() => {
 		if (progress >= 100) {
 			const timer = setTimeout(() => {
 				setIsVisible(false)
-			}, 800) // Increased delay for production
+			}, 800)
 			return () => clearTimeout(timer)
 		}
 	}, [progress])
 
-	// If not visible, don't render anything
 	if (!isVisible) return null
 
 	const dots = '.'.repeat(dotCount)
@@ -64,10 +63,10 @@ export default function LoadingScreen({ progress }: LoadingScreenProps) {
 					<span className={styles.percentage}>{displayProgress}%</span>
 				</div>
 
-				{/* Production-only debug info (remove in production if not needed) */}
-				{process.env.NODE_ENV === 'development' && (
-					<div className={styles.debugInfo}>
-						<small>Assets loading: {displayProgress}%</small>
+				{/* Optional: Show what's being loaded */}
+				{displayProgress < 100 && (
+					<div className={styles.loadingDetails}>
+						<small>Loading images & 3D model...</small>
 					</div>
 				)}
 			</div>
