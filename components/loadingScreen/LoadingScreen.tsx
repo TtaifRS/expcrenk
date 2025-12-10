@@ -1,14 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useImageLoader } from '@/hooks/useImageLoader'
 import styles from './LoadingScreen.module.css'
 
-export default function LoadingScreen() {
-	const { isLoaded, progress } = useImageLoader()
-	const [show, setShow] = useState(true)
+interface LoadingScreenProps {
+	progress: number
+}
+
+export default function LoadingScreen({ progress }: LoadingScreenProps) {
 	const [displayProgress, setDisplayProgress] = useState(0)
 	const [dotCount, setDotCount] = useState(0)
+	const [isVisible, setIsVisible] = useState(true)
 
 	// Smooth progress animation
 	useEffect(() => {
@@ -22,26 +24,30 @@ export default function LoadingScreen() {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setDotCount((prev) => (prev + 1) % 4)
-		}, 400)
-
+		}, 500)
 		return () => clearInterval(interval)
 	}, [])
 
-	// Handle exit animation
+	// Auto-hide after progress reaches 100% with delay
 	useEffect(() => {
-		if (isLoaded) {
-			const timer = setTimeout(() => setShow(false), 300)
+		if (progress >= 100) {
+			const timer = setTimeout(() => {
+				setIsVisible(false)
+			}, 800) // Increased delay for production
 			return () => clearTimeout(timer)
 		}
-	}, [isLoaded])
+	}, [progress])
 
-	if (!show) return null
+	// If not visible, don't render anything
+	if (!isVisible) return null
 
 	const dots = '.'.repeat(dotCount)
 
 	return (
 		<div
-			className={`${styles.loadingOverlay} ${isLoaded ? styles.hidden : ''}`}
+			className={`${styles.loadingOverlay} ${
+				progress >= 100 ? styles.fadeOut : ''
+			}`}
 		>
 			<div className={styles.loadingContent}>
 				<div className={styles.progressContainer}>
@@ -57,6 +63,13 @@ export default function LoadingScreen() {
 					Loading<span className={styles.dots}>{dots}</span>
 					<span className={styles.percentage}>{displayProgress}%</span>
 				</div>
+
+				{/* Production-only debug info (remove in production if not needed) */}
+				{process.env.NODE_ENV === 'development' && (
+					<div className={styles.debugInfo}>
+						<small>Assets loading: {displayProgress}%</small>
+					</div>
+				)}
 			</div>
 		</div>
 	)
