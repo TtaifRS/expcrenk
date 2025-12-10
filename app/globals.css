@@ -87,13 +87,6 @@ body:not(.loaded) * {
 	user-select: none !important;
 }
 
-/* Optional: subtle blur + dim under loader (beautiful) */
-body:not(.loaded) > *:not(.loadingOverlay) {
-	opacity: 0.15;
-	filter: blur(3px);
-	transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 /* Ensure loading screen is on top */
 .loadingOverlay {
 	position: fixed !important;
